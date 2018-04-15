@@ -8,8 +8,16 @@
  *
  ******************************************************************************/
 
+/*
+* Helpful commands (tried them on Git Bash)
+* javac -cp ".:/d/Workspace/Algs4Libs/algs4.jar" Point.java
+* java -cp ".:/d/Workspace/Algs4Libs/algs4.jar" Point input8.txt
+* */
+
 import java.util.Comparator;
 import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
 
 public class Point implements Comparable<Point> {
 
@@ -81,7 +89,7 @@ public class Point implements Comparable<Point> {
     if      (this.y == that.y)          return 0.0D;
     else if (this.x == that.x)          return Double.POSITIVE_INFINITY;
     else if (this.compareTo(that) == 0) return Double.NEGATIVE_INFINITY;
-    else                                return (that.y - this.y)/(that.x - this.x);
+    else                                return (that.y - this.y)/((double)(that.x - this.x));
   }
 
   /**
@@ -128,6 +136,31 @@ public class Point implements Comparable<Point> {
    * Unit tests the Point data type.
    */
   public static void main(String[] args) {
-    /* YOUR CODE HERE */
+    // read the n points from a file
+    In in = new In(args[0]);
+    int n = in.readInt();
+    Point[] points = new Point[n];
+    for (int i = 0; i < n; i++) {
+      int x = in.readInt();
+      int y = in.readInt();
+      points[i] = new Point(x, y);
+    }
+
+    // draw the points
+    StdDraw.enableDoubleBuffering();
+    StdDraw.setXscale(0, 32768);
+    StdDraw.setYscale(0, 32768);
+    for (Point p : points) {
+      p.draw();
+    }
+    StdDraw.show();
+
+    // print and draw the line segments
+    BruteCollinearPoints collinear = new BruteCollinearPoints(points);
+    for (LineSegment segment : collinear.segments()) {
+      StdOut.println(segment);
+      segment.draw();
+    }
+    StdDraw.show();
   }
 }

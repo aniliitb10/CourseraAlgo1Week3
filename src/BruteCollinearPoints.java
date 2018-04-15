@@ -7,6 +7,7 @@ public class BruteCollinearPoints
   private LineSegment getLineSegment(Point p0, Point p1, Point p2, Point p3)
   {
     Point minPoint = p0, maxPoint = p0;
+
     if (minPoint.compareTo(p1) > 0) { minPoint = p1; }
     if (minPoint.compareTo(p2) > 0) { minPoint = p2; }
     if (minPoint.compareTo(p3) > 0) { minPoint = p3; }
