@@ -1,9 +1,9 @@
 import java.util.Arrays;
+import java.util.ArrayList;
 
 public class FastCollinearPoints {
+  private ArrayList<LineSegment> _lineSegments = new ArrayList<>();
 
-  private int _numberOfSegments = 0;
-  private LineSegment[] _lineSegments;
   private class FCPoint implements Comparable<FCPoint>
   {
     private Point _p;
@@ -98,6 +98,7 @@ public class FastCollinearPoints {
 
     Arrays.sort(points_); // just to make sure that 1st line segment is the largest one
     LineSegmentPoints[] lineSegmentPoints = new LineSegmentPoints[points_.length];
+    int numberOfSegments = 0;
 
     for (int index = 0; index < points_.length; ++index)
     {
@@ -115,62 +116,58 @@ public class FastCollinearPoints {
         if (fcPoints[fcPointsIndex].slope() == fcPoints[fcPointsIndex + 2].slope())
         {
           // find the maximum number of such points in the list
-          for (int sameFcPointsIndex = (fcPointsIndex + 2); sameFcPointsIndex < (fcPoints.length); ++sameFcPointsIndex)
+          int sameFcPointsIndex = (fcPointsIndex + 2);
+          boolean reachedEnd = true;
+          for (; sameFcPointsIndex < (fcPoints.length); ++sameFcPointsIndex)
           {
-            // stop when either the slopes are no longer equal or the current point is the last point of this list (hack in this 2nd case)
-            if ((fcPoints[fcPointsIndex].slope() != fcPoints[sameFcPointsIndex].slope()) || (sameFcPointsIndex == (fcPoints.length - 1)))
+            // stop when either the slopes are no longer equal or all points are on the line segment
+            if (fcPoints[fcPointsIndex].slope() != fcPoints[sameFcPointsIndex].slope())
             {
-              // little hack:
-              if (sameFcPointsIndex == (fcPoints.length - 1))
-              {
-                sameFcPointsIndex++;
-              }
-
-              //check if this line is not already in the list
-              boolean isCollinear = false;
-              for (int lspCounter = 0; lspCounter < _numberOfSegments; ++lspCounter)
-              {
-                if (lineSegmentPoints[lspCounter].slope() == fcPoints[fcPointsIndex].slope())
-                {
-                  Point p1 = fcPoints[fcPointsIndex].getPoint();
-                  Point p2 = fcPoints[sameFcPointsIndex - 1].getPoint();
-                  if (lineSegmentPoints[lspCounter].collinearPoints(p1, p2))
-                  {
-                    isCollinear = true;
-                    break;
-                  }
-                }
-              }
-
-              if (!isCollinear)
-              {
-                lineSegmentPoints[_numberOfSegments++] = getLineSegmentPoints(fcPoints, fcPointsIndex, sameFcPointsIndex, points_[index]);
-              }
-
-              fcPointsIndex = (sameFcPointsIndex - 1);
-              break; // stop looking for collinear points now
+              reachedEnd = false;
+              break;
             }
           }
+
+          //check if this line is not already in the list
+          boolean isCollinear = false;
+          for (int lspCounter = 0; lspCounter < numberOfSegments; ++lspCounter)
+          {
+            if (lineSegmentPoints[lspCounter].slope() == fcPoints[fcPointsIndex].slope())
+            {
+              Point p1 = fcPoints[fcPointsIndex].getPoint();
+              Point p2 = fcPoints[fcPointsIndex + 1].getPoint();
+              if (lineSegmentPoints[lspCounter].collinearPoints(p1, p2))
+              {
+                isCollinear = true;
+                break;
+              }
+            }
+          }
+
+          if (!isCollinear)
+          {
+            lineSegmentPoints[numberOfSegments++] = getLineSegmentPoints(fcPoints, fcPointsIndex, (reachedEnd ?  fcPoints.length : sameFcPointsIndex), points_[index]);
+          }
+          fcPointsIndex = (reachedEnd ?  fcPoints.length : sameFcPointsIndex - 1);
         }
       } // done for one origin
     } // done for all points
 
-    _lineSegments = new LineSegment[_numberOfSegments];
-    for (int finalIndex = 0; finalIndex < _numberOfSegments; ++finalIndex)
+    for (int finalIndex = 0; finalIndex < numberOfSegments; ++finalIndex)
     {
-      _lineSegments[finalIndex] = lineSegmentPoints[finalIndex].getLineSegment();
+      _lineSegments.add(lineSegmentPoints[finalIndex].getLineSegment());
       lineSegmentPoints[finalIndex] = null;
     }
   }
   // the number of line segments
   public int numberOfSegments()
   {
-    return _numberOfSegments;
+    return _lineSegments.size();
   }
 
   // the line segments
   public LineSegment[] segments()
   {
-    return _lineSegments;
+    return _lineSegments.toArray(new LineSegment[0]);
   }
 }

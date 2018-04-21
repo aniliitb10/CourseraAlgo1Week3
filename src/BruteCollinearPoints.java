@@ -1,8 +1,9 @@
+import java.util.Arrays;
+import java.util.ArrayList;
+
 public class BruteCollinearPoints
 {
-  private int _numberOfSegments = 0;
-  private LineSegment[] _lineSegments;
-
+  private ArrayList<LineSegment> _lineSegments = new ArrayList<>();
 
   private LineSegment getLineSegment(Point p0, Point p1, Point p2, Point p3)
   {
@@ -19,15 +20,6 @@ public class BruteCollinearPoints
     return new LineSegment(minPoint, maxPoint);
   }
 
-
-  private void validateNonRepeatedPoints(Point p0, Point p1, Point p2, Point p3)
-  {
-    if ((p0.compareTo(p1) == 0) || (p0.compareTo(p2) == 0) || (p0.compareTo(p3) == 0) ||
-        (p1.compareTo(p2) == 0) || (p1.compareTo(p3) == 0) || (p2.compareTo(p3) == 0))
-    {
-      throw new java.lang.IllegalArgumentException("Repeated points");
-    }
-  }
   // finds all line segments containing 4 points
   public BruteCollinearPoints(Point[] points_)
   {
@@ -45,6 +37,17 @@ public class BruteCollinearPoints
       }
     }
 
+    Arrays.sort(points_);
+
+    for (int index = 0; index < (points_.length - 1); ++index)
+    {
+      if (points_[index].compareTo(points_[index + 1]) == 0)
+      {
+        throw new java.lang.IllegalArgumentException("Repeated Points: " + points_[index].toString() + ", " + points_[index + 1].toString());
+      }
+    }
+
+
     LineSegment[] lineSegments = new LineSegment[points_.length];
 
     for (int index0 = 0; index0 < points_.length; ++index0)
@@ -55,9 +58,6 @@ public class BruteCollinearPoints
         {
           for (int index3 = index2 + 1; index3 < points_.length; ++index3)
           {
-            // These points should be non-repeating
-            validateNonRepeatedPoints(points_[index0], points_[index1], points_[index2], points_[index3]);
-
             double slop01 = points_[index0].slopeTo(points_[index1]);
             double slop02 = points_[index0].slopeTo(points_[index2]);
 
@@ -66,31 +66,23 @@ public class BruteCollinearPoints
             double slop03 = points_[index0].slopeTo(points_[index3]);
             if (slop01 == slop03)
             {
-              lineSegments[_numberOfSegments++] = getLineSegment(points_[index0],points_[index1],
-                                                                  points_[index2], points_[index3]);
+              _lineSegments.add(getLineSegment(points_[index0],points_[index1], points_[index2], points_[index3]));
             }
           }
         }
       }
-    }
-
-    _lineSegments = new LineSegment[_numberOfSegments];
-    for (int index = 0; index < _numberOfSegments; ++index)
-    {
-      _lineSegments[index] = lineSegments[index];
-      lineSegments[index] = null;
     }
   }
 
   // the number of line segments
   public int numberOfSegments()
   {
-    return _numberOfSegments;
+    return _lineSegments.size();
   }
 
   // the line segments
   public LineSegment[] segments()
   {
-    return _lineSegments;
+    return _lineSegments.toArray(new LineSegment[0]);
   }
 }
