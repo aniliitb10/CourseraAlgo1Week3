@@ -19,9 +19,32 @@ public class BruteCollinearPoints
     return new LineSegment(minPoint, maxPoint);
   }
 
+
+  private void validateNonRepeatedPoints(Point p0, Point p1, Point p2, Point p3)
+  {
+    if ((p0.compareTo(p1) == 0) || (p0.compareTo(p2) == 0) || (p0.compareTo(p3) == 0) ||
+        (p1.compareTo(p2) == 0) || (p1.compareTo(p3) == 0) || (p2.compareTo(p3) == 0))
+    {
+      throw new java.lang.IllegalArgumentException("Repeated points");
+    }
+  }
   // finds all line segments containing 4 points
   public BruteCollinearPoints(Point[] points_)
   {
+    // some corner cases
+    if (points_ == null)
+    {
+      throw new java.lang.IllegalArgumentException("Argument to ctr is null");
+    }
+
+    for (Point p : points_)
+    {
+      if (p == null)
+      {
+        throw new java.lang.IllegalArgumentException("Argument to ctr has a null Point");
+      }
+    }
+
     LineSegment[] lineSegments = new LineSegment[points_.length];
 
     for (int index0 = 0; index0 < points_.length; ++index0)
@@ -32,6 +55,9 @@ public class BruteCollinearPoints
         {
           for (int index3 = index2 + 1; index3 < points_.length; ++index3)
           {
+            // These points should be non-repeating
+            validateNonRepeatedPoints(points_[index0], points_[index1], points_[index2], points_[index3]);
+
             double slop01 = points_[index0].slopeTo(points_[index1]);
             double slop02 = points_[index0].slopeTo(points_[index2]);
 
